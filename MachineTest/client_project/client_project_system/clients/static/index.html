@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Tester</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        .column {
+            width: 45%;
+            margin-bottom: 20px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .column h2 {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        input, textarea, button {
+            display: block;
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 8px;
+        }
+        textarea {
+            height: 100px;
+        }
+        .output {
+            background-color: #f9f9f9;
+            padding: 10px;
+            border: 1px solid #ddd;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>API Testing Interface</h1>
+
+    <div class="container">
+        <!-- Token Input -->
+        <div class="column">
+            <h2>User Token</h2>
+            <input type="text" id="token" placeholder="Enter authentication token" />
+        </div>
+
+        <!-- 1. Create User -->
+        <div class="column">
+            <h2>Create User</h2>
+            <input type="text" id="username" placeholder="Username" />
+            <input type="password" id="password" placeholder="Password" />
+            <input type="email" id="email" placeholder="Email" />
+            <button onclick="createUser()">Create User</button>
+            <h3>Response:</h3>
+            <div class="output" id="userOutput"></div>
+        </div>
+
+        <!-- 2. Register Client -->
+        <div class="column">
+            <h2>Register Client</h2>
+            <input type="text" id="client_name" placeholder="Client Name" />
+            <button onclick="registerClient()">Register Client</button>
+            <h3>Response:</h3>
+            <div class="output" id="clientOutput"></div>
+        </div>
+
+        <!-- 3. Create Project -->
+        <div class="column">
+            <h2>Create Project</h2>
+            <input type="text" id="project_name" placeholder="Project Name" />
+            <input type="number" id="project_client_id" placeholder="Client ID" />
+            <input type="text" id="project_users" placeholder="User IDs (comma separated)" />
+            <button onclick="createProject()">Create Project</button>
+            <h3>Response:</h3>
+            <div class="output" id="projectOutput"></div>
+        </div>
+
+        <!-- 4. Retrieve Client Info -->
+        <div class="column">
+            <h2>Retrieve Client Info</h2>
+            <input type="number" id="retrieve_client_id" placeholder="Client ID (Leave empty to fetch all clients)" />
+            <button onclick="retrieveClient()">Retrieve Client(s)</button>
+            <h3>Response:</h3>
+            <div class="output" id="retrieveClientOutput"></div>
+        </div>
+
+        <!-- 5. Edit Client Info (PUT) -->
+        <div class="column">
+            <h2>Edit Client Info (PUT)</h2>
+            <input type="number" id="edit_client_id" placeholder="Client ID" />
+            <input type="text" id="edit_client_name" placeholder="New Client Name" />
+            <button onclick="editClientPut()">Edit Client (PUT)</button>
+            <h3>Response:</h3>
+            <div class="output" id="editClientPutOutput"></div>
+        </div>
+
+        <!-- 6. Edit Client Info (PATCH) -->
+        <div class="column">
+            <h2>Edit Client Info (PATCH)</h2>
+            <input type="number" id="patch_client_id" placeholder="Client ID" />
+            <input type="text" id="patch_client_name" placeholder="New Client Name" />
+            <button onclick="editClientPatch()">Edit Client (PATCH)</button>
+            <h3>Response:</h3>
+            <div class="output" id="editClientPatchOutput"></div>
+        </div>
+
+        <!-- 7. Delete Client -->
+        <div class="column">
+            <h2>Delete Client</h2>
+            <input type="number" id="delete_client_id" placeholder="Client ID" />
+            <button onclick="deleteClient()">Delete Client</button>
+            <h3>Response:</h3>
+            <div class="output" id="deleteClientOutput"></div>
+        </div>
+    </div>
+
+    <script>
+        // Fetch token from input field
+        function getToken() {
+            return document.getElementById('token').value;
+        }
+
+        // 1. Create User
+        function createUser() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const email = document.getElementById('email').value;
+
+            fetch('/api/register/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Token ${getToken()}`
+                },
+                body: JSON.stringify({ username, password, email })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('userOutput').textContent = JSON.stringify(data, null, 2);
+            });
+        }
+
+        // 2. Register Client
+        function registerClient() {
+            const client_name = document.getElementById('client_name').value;
+
+            fetch('/api/clients/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Token ${getToken()}`
+                },
+                body: JSON.stringify({ client_name })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('clientOutput').textContent = JSON.stringify(data, null, 2);
+            });
+        }
+
+        // 3. Create Project
+        function createProject() {
+            const project_name = document.getElementById('project_name').value;
+            const client = (document.getElementById('project_client_id').value);
+            const users = document.getElementById('project_users').value.split(',').map(id => parseInt(id.trim()));
+
+            fetch('/api/projects/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Token ${getToken()}`
+                },
+                body: JSON.stringify({ project_name, client, users })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('projectOutput').textContent = JSON.stringify(data, null, 2);
+            });
+        }
+
+        // 4. Retrieve Client
+        function retrieveClient() {
+            const client_id = document.getElementById('retrieve_client_id').value;
+            const url = client_id ? `/api/clients/${client_id}/` : '/api/clients/';
+
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Token ${getToken()}`
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('retrieveClientOutput').textContent = JSON.stringify(data, null, 2);
+            });
+        }
+
+        // 5. Edit Client (PUT)
+        function editClientPut() {
+            const client_id = document.getElementById('edit_client_id').value;
+            const client_name = document.getElementById('edit_client_name').value;
+
+            fetch(`/api/clients/${client_id}/`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Token ${getToken()}`
+                },
+                body: JSON.stringify({ client_name })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('editClientPutOutput').textContent = JSON.stringify(data, null, 2);
+            });
+        }
+
+        // 6. Edit Client (PATCH)
+        function editClientPatch() {
+            const client_id = document.getElementById('patch_client_id').value;
+            const client_name = document.getElementById('patch_client_name').value;
+
+            fetch(`/api/clients/${client_id}/`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Token ${getToken()}`
+                },
+                body: JSON.stringify({ client_name })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('editClientPatchOutput').textContent = JSON.stringify(data, null, 2);
+            });
+        }
+
+        // 7. Delete Client
+        function deleteClient() {
+            const client_id = document.getElementById('delete_client_id').value;
+
+            fetch(`/api/clients/${client_id}/`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Token ${getToken()}`
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    document.getElementById('deleteClientOutput').textContent = 'Client deleted successfully!';
+                } else {
+                    document.getElementById('deleteClientOutput').textContent = 'Error deleting client.';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
