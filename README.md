@@ -8,10 +8,13 @@ steps for setup
 5) Activate env using source env\bin\activate for ubuntu
 6) install requirements.txt using pip install -r requirements.txt
 7) nevigate to client_project_system
-8) python manage.py runserver
-9) for testing after runserver you can use postman , thunderclient or type http://127.0.0.1:8000/static/index.html
-10) get token  from admin interface of django
-11) test apis
+8) go to settings.py add your sql database credentials
+9) python manage.py makemigrations
+10) python manage.py migrate
+11) python manage.py runserver
+12) for testing after runserver you can use postman , thunderclient or type http://127.0.0.1:8000/static/index.html
+13) get token  from admin interface of django
+14) test apis
 
     
 
